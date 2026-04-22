@@ -61,13 +61,13 @@ type Model struct {
 	gotoInput    string
 
 	// Stats mode
-	statsData  []db.DateStats
-	statsRange string
+	statsData    ui.StatsData
+	statsRange   string
 
 	// Settings mode
 	settingsCursor    int
 	settingsDropdown  bool
-	settingsOptions   []string
+	settingsItems     []ui.SettingItem
 	settingsOptCursor int
 }
 
@@ -127,6 +127,22 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.searchResults = msg.results
 		return m, nil
 
+	case gotoStatsMsg:
+		if msg.err != nil {
+			m.err = msg.err
+			return m, nil
+		}
+		m.gotoStats = msg.stats
+		return m, nil
+
+	case statsDataMsg:
+		if msg.err != nil {
+			m.err = msg.err
+			return m, nil
+		}
+		m.statsData = ui.AggregateStats(msg.stats)
+		return m, nil
+
 	case tea.KeyMsg:
 		// Global quit
 		if msg.String() == "ctrl+c" || msg.String() == "q" && m.mode == ModeViewer {
@@ -142,6 +158,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.updateEdit(msg)
 		case ModeSearch:
 			return m.updateSearch(msg)
+		case ModeGoto:
+			return m.updateGoto(msg)
+		case ModeStats:
+			return m.updateStats(msg)
+		case ModeSettings:
+			return m.updateSettings(msg)
 		}
 	}
 
@@ -175,6 +197,12 @@ func (m Model) View() string {
 		}
 	case ModeSearch:
 		s.WriteString(m.viewSearch())
+	case ModeGoto:
+		s.WriteString(ui.RenderGoto(m.gotoStats, m.gotoCursor, m.gotoInput, m.cfg.DateFormat, m.width, m.styles))
+	case ModeStats:
+		s.WriteString(ui.RenderStats(m.statsData, m.statsRange, m.styles))
+	case ModeSettings:
+		s.WriteString(ui.RenderSettings(m.settingsItems, m.settingsCursor, m.settingsDropdown, m.settingsOptCursor, m.styles))
 	}
 
 	// Error display
@@ -307,13 +335,19 @@ func (m Model) viewHelp() string {
 	var help string
 	switch m.mode {
 	case ModeViewer:
-		help = "[i]nsert  [e]dit  [s]earch  [g]oto  [r]emove  [Enter] cycle status  [q]uit"
+		help = "[i]nsert  [e]dit  [s]earch  [g]oto  [r]emove  [Enter] cycle status  [/] commands  [q]uit"
 	case ModeInsert:
-		help = "[Enter] add task  [Esc] back  [/] commands"
+		help = "[Enter] add task  [Esc] back  [/] commands  [↑/↓] history"
 	case ModeEdit:
 		help = "[Enter] save  [Esc] cancel"
 	case ModeSearch:
 		help = "[Enter] go to task  [Esc] back  [↑/↓] navigate  [p/d/x/space] status"
+	case ModeGoto:
+		help = "[↑/↓]: Navigate  |  [Enter]: Open List  |  [i]: Insert  |  [Esc]: Back"
+	case ModeStats:
+		help = "[Esc]: Back"
+	case ModeSettings:
+		help = "[↑/↓]: Navigate  |  [Enter]: Change  |  [Esc]: Return"
 	}
 	return m.styles.HelpStyle.Render(help)
 }
@@ -351,6 +385,18 @@ func (m Model) updateViewer(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.searchQuery = ""
 		m.searchResults = nil
 		m.searchCursor = 0
+
+	case ui.Key(msg, "g"):
+		m.mode = ModeGoto
+		m.gotoInput = ""
+		m.gotoCursor = 0
+		return m, m.loadGotoStats()
+
+	case ui.Key(msg, "/"):
+		// Enter insert mode with slash pre-filled
+		m.mode = ModeInsert
+		m.inputValue = "/"
+		m.deleteConfirm = false
 
 	case ui.Key(msg, "r"):
 		if len(m.tasks) > 0 {
@@ -597,8 +643,208 @@ func (m Model) handleSlashCommand(input string) (tea.Model, tea.Cmd) {
 		m.svc.MigrateAllTasks()
 		m.inputValue = ""
 		return m, m.loadTasks()
+
+	case "/stats":
+		rangeLabel := "all"
+		if len(parts) > 1 {
+			rangeLabel = parts[1]
+		}
+		m.statsRange = rangeLabel
+		m.mode = ModeStats
+		m.inputValue = ""
+		return m, m.loadStatsData()
+
+	case "/settings":
+		m.mode = ModeSettings
+		m.settingsItems = ui.BuildSettingsItems(m.cfg)
+		m.settingsCursor = 0
+		m.settingsDropdown = false
+		m.inputValue = ""
+
+	case "/sort":
+		if len(parts) > 1 {
+			// Sort is handled client-side in a later commit
+		}
+		m.inputValue = ""
+
+	case "/export":
+		if len(parts) > 1 {
+			// Export is handled in a later commit
+		}
+		m.inputValue = ""
 	}
 
 	m.inputValue = ""
+	return m, nil
+}
+
+// --- Goto Mode ---
+
+type gotoStatsMsg struct {
+	stats []db.DateStats
+	err   error
+}
+
+func (m Model) loadGotoStats() tea.Cmd {
+	return func() tea.Msg {
+		stats, err := m.svc.GetDateStats()
+		return gotoStatsMsg{stats: stats, err: err}
+	}
+}
+
+func (m Model) updateGoto(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch {
+	case ui.Key(msg, "esc"):
+		m.mode = ModeViewer
+		m.gotoInput = ""
+
+	case ui.Key(msg, "up"):
+		if m.gotoCursor > 0 {
+			m.gotoCursor--
+		}
+
+	case ui.Key(msg, "down"):
+		if m.gotoCursor < len(m.gotoStats)-1 {
+			m.gotoCursor++
+		}
+
+	case ui.Key(msg, "enter"):
+		if len(m.gotoStats) > 0 {
+			m.currentDate = m.gotoStats[m.gotoCursor].Date
+			m.mode = ModeViewer
+			m.gotoInput = ""
+			return m, m.loadTasks()
+		}
+		// If we have date input, try to parse and jump
+		if m.gotoInput != "" {
+			storageDate, err := service.FormatDate(m.gotoInput, m.cfg.DateFormat)
+			if err == nil {
+				m.currentDate = storageDate
+				m.mode = ModeViewer
+				m.gotoInput = ""
+				return m, m.loadTasks()
+			}
+			m.err = err
+		}
+
+	case ui.Key(msg, "i"):
+		m.mode = ModeInsert
+		m.inputValue = ""
+
+	case ui.Key(msg, "backspace"):
+		if len(m.gotoInput) > 0 {
+			m.gotoInput = m.gotoInput[:len(m.gotoInput)-1]
+		}
+
+	default:
+		if msg.Type == tea.KeyRunes {
+			m.gotoInput += string(msg.Runes)
+			// Try to find matching date and focus
+			for i, st := range m.gotoStats {
+				display := service.StorageToDisplay(st.Date, m.cfg.DateFormat)
+				if strings.HasPrefix(display, m.gotoInput) {
+					m.gotoCursor = i
+					break
+				}
+			}
+		}
+	}
+
+	return m, nil
+}
+
+// --- Stats Mode ---
+
+type statsDataMsg struct {
+	stats []db.DateStats
+	err   error
+}
+
+func (m Model) loadStatsData() tea.Cmd {
+	return func() tea.Msg {
+		stats, err := m.svc.GetDateStats()
+		return statsDataMsg{stats: stats, err: err}
+	}
+}
+
+func (m Model) updateStats(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	if ui.Key(msg, "esc") {
+		m.mode = ModeViewer
+	}
+	return m, nil
+}
+
+// --- Settings Mode ---
+
+func (m Model) updateSettings(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	if m.settingsDropdown {
+		return m.updateSettingsDropdown(msg)
+	}
+
+	switch {
+	case ui.Key(msg, "esc"):
+		// Save and exit
+		newCfg := ui.ApplySettingsItems(m.settingsItems)
+		config.Save(newCfg)
+		m.cfg = newCfg
+		m.styles = ui.NewStyles(newCfg)
+		m.mode = ModeViewer
+
+	case ui.Key(msg, "up"):
+		if m.settingsCursor > 0 {
+			m.settingsCursor--
+		}
+
+	case ui.Key(msg, "down"):
+		if m.settingsCursor < len(m.settingsItems)-1 {
+			m.settingsCursor++
+		}
+
+	case ui.Key(msg, "enter"):
+		item := m.settingsItems[m.settingsCursor]
+		if item.Type == "bool" {
+			if item.Value == "True" {
+				m.settingsItems[m.settingsCursor].Value = "False"
+			} else {
+				m.settingsItems[m.settingsCursor].Value = "True"
+			}
+		} else if item.Type == "select" {
+			m.settingsDropdown = true
+			m.settingsOptCursor = 0
+			// Find current value in options
+			for i, opt := range item.Options {
+				if opt == item.Value {
+					m.settingsOptCursor = i
+					break
+				}
+			}
+		}
+	}
+
+	return m, nil
+}
+
+func (m Model) updateSettingsDropdown(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	item := m.settingsItems[m.settingsCursor]
+
+	switch {
+	case ui.Key(msg, "esc"):
+		m.settingsDropdown = false
+
+	case ui.Key(msg, "up"):
+		if m.settingsOptCursor > 0 {
+			m.settingsOptCursor--
+		}
+
+	case ui.Key(msg, "down"):
+		if m.settingsOptCursor < len(item.Options)-1 {
+			m.settingsOptCursor++
+		}
+
+	case ui.Key(msg, "enter"):
+		m.settingsItems[m.settingsCursor].Value = item.Options[m.settingsOptCursor]
+		m.settingsDropdown = false
+	}
+
 	return m, nil
 }
