@@ -1,30 +1,31 @@
 package app
 
 import (
-"fmt"
-"strings"
+	"fmt"
+	"sort"
+	"strings"
 
-tea "github.com/charmbracelet/bubbletea"
-"github.com/charmbracelet/lipgloss"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 
-"github.com/adem/taskbyte/internal/config"
-"github.com/adem/taskbyte/internal/db"
-"github.com/adem/taskbyte/internal/model"
-"github.com/adem/taskbyte/internal/service"
-"github.com/adem/taskbyte/internal/ui"
+	"github.com/adem/taskbyte/internal/config"
+	"github.com/adem/taskbyte/internal/db"
+	"github.com/adem/taskbyte/internal/model"
+	"github.com/adem/taskbyte/internal/service"
+	"github.com/adem/taskbyte/internal/ui"
 )
 
 // Mode represents the current application mode.
 type Mode int
 
 const (
-ModeViewer Mode = iota
-ModeInsert
-ModeEdit
-ModeSearch
-ModeGoto
-ModeStats
-ModeSettings
+	ModeViewer Mode = iota
+	ModeInsert
+	ModeEdit
+	ModeSearch
+	ModeGoto
+	ModeStats
+	ModeSettings
 )
 
 // Model is the top-level Bubble Tea model.
@@ -41,9 +42,9 @@ type Model struct {
 	err         error
 
 	// Insert/Edit mode
-	inputValue  string
-	inputCursor int
-	editTaskID  int
+	inputValue   string
+	inputCursor  int
+	editTaskID   int
 	inputHistory []string
 	historyIdx   int
 
@@ -56,13 +57,13 @@ type Model struct {
 	deleteConfirm bool
 
 	// Goto mode
-	gotoStats    []db.DateStats
-	gotoCursor   int
-	gotoInput    string
+	gotoStats  []db.DateStats
+	gotoCursor int
+	gotoInput  string
 
 	// Stats mode
-	statsData    ui.StatsData
-	statsRange   string
+	statsData  ui.StatsData
+	statsRange string
 
 	// Settings mode
 	settingsCursor    int
@@ -264,7 +265,7 @@ func (m Model) renderTask(task model.Task, focused bool) string {
 	// Add status timestamp
 	if task.StatusChangedAt != nil && task.Status != model.StatusTodo {
 		ts := task.StatusChangedAt.Local().Format("02.01.2006 15:04")
-		text += style.Render(" - "+ts)
+		text += style.Render(" - " + ts)
 	}
 
 	if focused {
@@ -663,13 +664,50 @@ func (m Model) handleSlashCommand(input string) (tea.Model, tea.Cmd) {
 
 	case "/sort":
 		if len(parts) > 1 {
-			// Sort is handled client-side in a later commit
+			sortType := parts[1]
+			switch sortType {
+			case "date":
+				sort.Slice(m.tasks, func(i, j int) bool {
+					return m.tasks[i].CreatedAt.Before(m.tasks[j].CreatedAt)
+				})
+			case "date-reverse":
+				sort.Slice(m.tasks, func(i, j int) bool {
+					return m.tasks[i].CreatedAt.After(m.tasks[j].CreatedAt)
+				})
+			case "progress":
+				statusOrder := map[model.Status]int{
+					model.StatusInProgress: 0,
+					model.StatusTodo:       1,
+					model.StatusDone:       2,
+					model.StatusCancelled:  3,
+				}
+				sort.Slice(m.tasks, func(i, j int) bool {
+					return statusOrder[m.tasks[i].Status] < statusOrder[m.tasks[j].Status]
+				})
+			case "progress-reverse":
+				statusOrder := map[model.Status]int{
+					model.StatusInProgress: 0,
+					model.StatusTodo:       1,
+					model.StatusDone:       2,
+					model.StatusCancelled:  3,
+				}
+				sort.Slice(m.tasks, func(i, j int) bool {
+					return statusOrder[m.tasks[i].Status] > statusOrder[m.tasks[j].Status]
+				})
+			}
 		}
 		m.inputValue = ""
 
 	case "/export":
+		exportPath := ""
 		if len(parts) > 1 {
-			// Export is handled in a later commit
+			exportPath = strings.Join(parts[1:], " ")
+		}
+		path, err := ui.ExportToMarkdown(m.tasks, m.currentDate, m.cfg.DateFormat, exportPath)
+		if err != nil {
+			m.err = err
+		} else {
+			m.err = fmt.Errorf("exported to: %s", path) // show as info
 		}
 		m.inputValue = ""
 	}
