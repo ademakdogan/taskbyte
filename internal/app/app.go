@@ -223,8 +223,14 @@ func (m Model) viewTaskList() string {
 		return m.styles.Subtle.Render("  No tasks for this date. Press 'i' to add one.\n")
 	}
 
+
 	var s strings.Builder
 	for i, task := range m.tasks {
+		// Auto-hide completed/cancelled tasks if enabled
+		if m.cfg.AutoHideCompleted && (task.Status == model.StatusDone || task.Status == model.StatusCancelled) {
+			continue
+		}
+
 		cursor := "  "
 		if i == m.cursor && m.mode == ModeViewer {
 			cursor = m.styles.FocusedItem.Render("> ")
@@ -301,10 +307,69 @@ func (m Model) viewInput() string {
 	}
 
 	top := m.styles.Subtle.Render("┌─ " + dateDisplay + " " + strings.Repeat("─", max(0, 40-len(dateDisplay))) + "┐")
-	input := "│ › " + m.inputValue + "█" + strings.Repeat(" ", max(0, 37-len(m.inputValue))) + " │"
+
+	// Ghost text for slash commands
+	ghostText := m.getGhostText()
+	displayInput := m.inputValue + "█"
+	if ghostText != "" {
+		displayInput = m.inputValue + m.styles.Subtle.Render(ghostText) + "█"
+	}
+
+	input := "│ › " + displayInput + strings.Repeat(" ", max(0, 37-len(m.inputValue)-len(ghostText))) + " │"
 	bottom := m.styles.Subtle.Render("└" + strings.Repeat("─", max(0, 34-len(modeLabel))) + " " + modeLabel + " ─┘")
 
 	return top + "\n" + input + "\n" + bottom
+}
+
+func (m Model) getGhostText() string {
+	if m.inputValue == "" {
+		return ""
+	}
+
+	commands := map[string]string{
+		"/":            "date | sort | export | hide | show | migrate | migrate-all | stats | settings",
+		"/d":           "ate DD.MM.YYYY",
+		"/da":          "te DD.MM.YYYY",
+		"/dat":         "e DD.MM.YYYY",
+		"/date":        " DD.MM.YYYY",
+		"/s":           "ort | stats | settings",
+		"/so":          "rt [date/progress/date-reverse/progress-reverse]",
+		"/sor":         "t [date/progress/date-reverse/progress-reverse]",
+		"/sort":        " [date/progress/date-reverse/progress-reverse]",
+		"/st":          "ats [day/week/month/all]",
+		"/sta":         "ts [day/week/month/all]",
+		"/stat":        "s [day/week/month/all]",
+		"/stats":       " [day/week/month/all]",
+		"/se":          "ttings",
+		"/set":         "tings",
+		"/sett":        "ings",
+		"/e":           "xport [Path]",
+		"/ex":          "port [Path]",
+		"/exp":         "ort [Path]",
+		"/expo":        "rt [Path]",
+		"/expor":       "t [Path]",
+		"/export":      " [Path]",
+		"/h":           "ide",
+		"/hi":          "de",
+		"/hid":         "e",
+		"/sh":          "ow",
+		"/sho":         "w",
+		"/m":           "igrate [DD.MM.YYYY]",
+		"/mi":          "grate [DD.MM.YYYY]",
+		"/mig":         "rate [DD.MM.YYYY]",
+		"/migr":        "ate [DD.MM.YYYY]",
+		"/migra":       "te [DD.MM.YYYY]",
+		"/migrat":      "e [DD.MM.YYYY]",
+		"/migrate":     " [DD.MM.YYYY]",
+		"/migrate-":    "all",
+		"/migrate-a":   "ll",
+		"/migrate-al":  "l",
+	}
+
+	if ghost, ok := commands[m.inputValue]; ok {
+		return ghost
+	}
+	return ""
 }
 
 func (m Model) viewSearch() string {
