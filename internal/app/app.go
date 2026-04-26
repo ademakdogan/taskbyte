@@ -864,9 +864,14 @@ type statsDataMsg struct {
 }
 
 func (m Model) loadStatsData() tea.Cmd {
+	statsRange := m.statsRange
 	return func() tea.Msg {
 		stats, err := m.svc.GetDateStats()
-		return statsDataMsg{stats: stats, err: err}
+		if err != nil {
+			return statsDataMsg{stats: nil, err: err}
+		}
+		filtered := service.FilterStatsByRange(stats, statsRange)
+		return statsDataMsg{stats: filtered, err: nil}
 	}
 }
 
