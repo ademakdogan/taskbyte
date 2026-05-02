@@ -632,6 +632,24 @@ func (m Model) updateSearch(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			return m, m.doSearch()
 		}
 
+	case ui.Key(msg, "d"):
+		if len(m.searchResults) > 0 {
+			m.svc.SetStatus(m.searchResults[m.searchCursor].ID, model.StatusDone)
+			return m, m.doSearch()
+		}
+
+	case ui.Key(msg, "x"):
+		if len(m.searchResults) > 0 {
+			m.svc.SetStatus(m.searchResults[m.searchCursor].ID, model.StatusCancelled)
+			return m, m.doSearch()
+		}
+
+	case ui.Key(msg, " "):
+		if len(m.searchResults) > 0 {
+			m.svc.SetStatus(m.searchResults[m.searchCursor].ID, model.StatusTodo)
+			return m, m.doSearch()
+		}
+
 	case ui.Key(msg, "backspace"):
 		if len(m.searchQuery) > 0 {
 			m.searchQuery = m.searchQuery[:len(m.searchQuery)-1]
