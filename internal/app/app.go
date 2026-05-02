@@ -144,9 +144,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.statsData = ui.AggregateStats(msg.stats)
 		return m, nil
 
+	case clearErrorMsg:
+		m.err = nil
+		return m, nil
+
 	case tea.KeyMsg:
+		// Clear error on any keypress
+		m.err = nil
+
 		// Global quit
-		if msg.String() == "ctrl+c" || msg.String() == "q" && m.mode == ModeViewer {
+		if msg.String() == "ctrl+c" || (msg.String() == "q" && m.mode == ModeViewer) {
 			return m, tea.Quit
 		}
 
