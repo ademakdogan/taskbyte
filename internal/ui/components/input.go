@@ -1,9 +1,9 @@
 package components
 
 import (
-"strings"
+	"strings"
 
-"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/lipgloss"
 )
 
 // InputBox renders a bordered input box with a label.

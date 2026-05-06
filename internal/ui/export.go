@@ -1,14 +1,14 @@
 package ui
 
 import (
-"fmt"
-"os"
-"path/filepath"
-"strings"
-"time"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
 
-"github.com/adem/taskbyte/internal/model"
-"github.com/adem/taskbyte/internal/service"
+	"github.com/adem/taskbyte/internal/model"
+	"github.com/adem/taskbyte/internal/service"
 )
 
 // ExportToMarkdown exports tasks to a markdown file.

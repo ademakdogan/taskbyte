@@ -1,12 +1,12 @@
 package components
 
 import (
-"fmt"
-"strings"
+	"fmt"
+	"strings"
 
-"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/lipgloss"
 
-"github.com/adem/taskbyte/internal/model"
+	"github.com/adem/taskbyte/internal/model"
 )
 
 // TaskListRenderer handles the rendering of task lists.

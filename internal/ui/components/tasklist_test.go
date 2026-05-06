@@ -1,12 +1,12 @@
 package components
 
 import (
-"testing"
-"time"
+	"testing"
+	"time"
 
-"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/lipgloss"
 
-"github.com/adem/taskbyte/internal/model"
+	"github.com/adem/taskbyte/internal/model"
 )
 
 func newTestRenderer() TaskListRenderer {

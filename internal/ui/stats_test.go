@@ -1,10 +1,10 @@
 package ui
 
 import (
-"testing"
+	"testing"
 
-"github.com/adem/taskbyte/internal/config"
-"github.com/adem/taskbyte/internal/db"
+	"github.com/adem/taskbyte/internal/config"
+	"github.com/adem/taskbyte/internal/db"
 )
 
 func TestAggregateStats(t *testing.T) {

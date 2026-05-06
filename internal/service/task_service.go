@@ -1,13 +1,13 @@
 package service
 
 import (
-"fmt"
-"regexp"
-"strings"
-"time"
+	"fmt"
+	"regexp"
+	"strings"
+	"time"
 
-"github.com/adem/taskbyte/internal/db"
-"github.com/adem/taskbyte/internal/model"
+	"github.com/adem/taskbyte/internal/db"
+	"github.com/adem/taskbyte/internal/model"
 )
 
 // TaskService provides business logic for task operations.
@@ -129,30 +129,30 @@ func (s *TaskService) GetTaskByID(id int) (*model.Task, error) {
 
 // TodayString returns today's date as YYYY-MM-DD.
 func TodayString() string {
-return time.Now().Format("2006-01-02")
+	return time.Now().Format("2006-01-02")
 }
 
 // FormatDate converts a display date (DD.MM.YYYY) to storage format (YYYY-MM-DD).
 func FormatDate(displayDate, format string) (string, error) {
-var goFormat string
-switch format {
-case "DD.MM.YYYY":
-goFormat = "02.01.2006"
-case "MM.DD.YYYY":
-goFormat = "01.02.2006"
-case "YYYY-MM-DD":
-goFormat = "2006-01-02"
-case "YYYY.MM.DD":
-goFormat = "2006.01.02"
-default:
-goFormat = "02.01.2006"
-}
+	var goFormat string
+	switch format {
+	case "DD.MM.YYYY":
+		goFormat = "02.01.2006"
+	case "MM.DD.YYYY":
+		goFormat = "01.02.2006"
+	case "YYYY-MM-DD":
+		goFormat = "2006-01-02"
+	case "YYYY.MM.DD":
+		goFormat = "2006.01.02"
+	default:
+		goFormat = "02.01.2006"
+	}
 
-t, err := time.Parse(goFormat, displayDate)
-if err != nil {
-return "", fmt.Errorf("invalid date %q for format %q: %w", displayDate, format, err)
-}
-return t.Format("2006-01-02"), nil
+	t, err := time.Parse(goFormat, displayDate)
+	if err != nil {
+		return "", fmt.Errorf("invalid date %q for format %q: %w", displayDate, format, err)
+	}
+	return t.Format("2006-01-02"), nil
 }
 
 // StorageToDisplay converts a storage date (YYYY-MM-DD) to the user's display format.
@@ -183,12 +183,12 @@ func IsToday(storageDate string) bool {
 
 // YesterdayString returns yesterday's date as YYYY-MM-DD.
 func YesterdayString() string {
-return time.Now().AddDate(0, 0, -1).Format("2006-01-02")
+	return time.Now().AddDate(0, 0, -1).Format("2006-01-02")
 }
 
 // ValidateDateInput checks if a string looks like a valid date.
 var datePattern = regexp.MustCompile(`^\d{2}\.\d{2}\.\d{4}$`)
 
 func ValidateDateInput(input string) bool {
-return datePattern.MatchString(input)
+	return datePattern.MatchString(input)
 }

@@ -1,11 +1,11 @@
 package ui
 
 import (
-"fmt"
-"math"
-"strings"
+	"fmt"
+	"math"
+	"strings"
 
-"github.com/adem/taskbyte/internal/db"
+	"github.com/adem/taskbyte/internal/db"
 )
 
 // StatsData holds aggregated statistics.
@@ -77,11 +77,11 @@ func RenderStats(data StatsData, rangeLabel string, styles Styles) string {
 		}
 		pct := float64(seg.count) / float64(data.Total) * 100
 		line := fmt.Sprintf("  %s %-14s %3d  (%5.1f%%)",
-seg.style("●"),
-seg.label,
-seg.count,
-pct,
-)
+			seg.style("●"),
+			seg.label,
+			seg.count,
+			pct,
+		)
 		s.WriteString(line + "\n")
 	}
 

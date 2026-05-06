@@ -1,9 +1,9 @@
 package app
 
 import (
-"time"
+	"time"
 
-tea "github.com/charmbracelet/bubbletea"
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 // clearErrorMsg is sent to clear the error after a timeout.
@@ -12,8 +12,8 @@ type clearErrorMsg struct{}
 // clearErrorAfter returns a command that clears the error after a delay.
 func clearErrorAfter(d time.Duration) tea.Cmd {
 	return tea.Tick(d, func(t time.Time) tea.Msg {
-return clearErrorMsg{}
-})
+		return clearErrorMsg{}
+	})
 }
 
 // formatBytes returns a human-readable byte size.

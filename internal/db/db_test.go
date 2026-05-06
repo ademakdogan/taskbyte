@@ -1,9 +1,9 @@
 package db
 
 import (
-"testing"
+	"testing"
 
-"github.com/adem/taskbyte/internal/model"
+	"github.com/adem/taskbyte/internal/model"
 )
 
 func newTestDB(t *testing.T) (*DB, *Repository) {

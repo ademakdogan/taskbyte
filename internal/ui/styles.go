@@ -1,9 +1,9 @@
 package ui
 
 import (
-"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/lipgloss"
 
-"github.com/adem/taskbyte/internal/config"
+	"github.com/adem/taskbyte/internal/config"
 )
 
 // Colors maps config color names to lipgloss colors.

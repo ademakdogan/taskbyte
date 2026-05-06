@@ -1,11 +1,11 @@
 package ui
 
 import (
-"os"
-"path/filepath"
-"testing"
+	"os"
+	"path/filepath"
+	"testing"
 
-"github.com/adem/taskbyte/internal/model"
+	"github.com/adem/taskbyte/internal/model"
 )
 
 func TestExportToMarkdown(t *testing.T) {

@@ -1,10 +1,10 @@
 package config
 
 import (
-"encoding/json"
-"errors"
-"os"
-"sync"
+	"encoding/json"
+	"errors"
+	"os"
+	"sync"
 )
 
 // ThemeConfig holds color settings for task statuses.
@@ -49,78 +49,78 @@ func ValidColors() []string {
 }
 
 var (
-current Config
-mu      sync.RWMutex
-loaded  bool
+	current Config
+	mu      sync.RWMutex
+	loaded  bool
 )
 
 // Load reads the config from disk, or creates a default one if it doesn't exist.
 func Load() (Config, error) {
-mu.Lock()
-defer mu.Unlock()
+	mu.Lock()
+	defer mu.Unlock()
 
-path, err := ConfigPath()
-if err != nil {
-return Config{}, err
-}
+	path, err := ConfigPath()
+	if err != nil {
+		return Config{}, err
+	}
 
-data, err := os.ReadFile(path)
-if err != nil {
-if errors.Is(err, os.ErrNotExist) {
-cfg := DefaultConfig()
-if writeErr := writeConfig(path, cfg); writeErr != nil {
-return Config{}, writeErr
-}
-current = cfg
-loaded = true
-return cfg, nil
-}
-return Config{}, err
-}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			cfg := DefaultConfig()
+			if writeErr := writeConfig(path, cfg); writeErr != nil {
+				return Config{}, writeErr
+			}
+			current = cfg
+			loaded = true
+			return cfg, nil
+		}
+		return Config{}, err
+	}
 
-var cfg Config
-if err := json.Unmarshal(data, &cfg); err != nil {
-// If JSON is corrupt, reset to defaults
-cfg = DefaultConfig()
-if writeErr := writeConfig(path, cfg); writeErr != nil {
-return Config{}, writeErr
-}
-}
+	var cfg Config
+	if err := json.Unmarshal(data, &cfg); err != nil {
+		// If JSON is corrupt, reset to defaults
+		cfg = DefaultConfig()
+		if writeErr := writeConfig(path, cfg); writeErr != nil {
+			return Config{}, writeErr
+		}
+	}
 
-current = cfg
-loaded = true
-return cfg, nil
+	current = cfg
+	loaded = true
+	return cfg, nil
 }
 
 // Save persists the given config to disk.
 func Save(cfg Config) error {
-mu.Lock()
-defer mu.Unlock()
+	mu.Lock()
+	defer mu.Unlock()
 
-path, err := ConfigPath()
-if err != nil {
-return err
-}
+	path, err := ConfigPath()
+	if err != nil {
+		return err
+	}
 
-current = cfg
-return writeConfig(path, cfg)
+	current = cfg
+	return writeConfig(path, cfg)
 }
 
 // Get returns the current in-memory config. Must call Load first.
 func Get() Config {
-mu.RLock()
-defer mu.RUnlock()
+	mu.RLock()
+	defer mu.RUnlock()
 
-if !loaded {
-return DefaultConfig()
-}
-return current
+	if !loaded {
+		return DefaultConfig()
+	}
+	return current
 }
 
 func writeConfig(path string, cfg Config) error {
-data, err := json.MarshalIndent(cfg, "", "  ")
-if err != nil {
-return err
-}
-return os.WriteFile(path, data, 0o644)
+	data, err := json.MarshalIndent(cfg, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(path, data, 0o644)
 }

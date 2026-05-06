@@ -1,13 +1,13 @@
 package ui
 
 import (
-"fmt"
-"strings"
+	"fmt"
+	"strings"
 
-"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/lipgloss"
 
-"github.com/adem/taskbyte/internal/db"
-"github.com/adem/taskbyte/internal/service"
+	"github.com/adem/taskbyte/internal/db"
+	"github.com/adem/taskbyte/internal/service"
 )
 
 // RenderGoto renders the goto/calendar view.
@@ -45,12 +45,12 @@ func RenderGoto(stats []db.DateStats, cursor int, input string, dateFormat strin
 			}
 
 			line := fmt.Sprintf("%-14s | %4d | %s | %s | %s | %s",
-dateDisplay, st.Total, todoStr, inProgStr, doneStr, cancStr)
+				dateDisplay, st.Total, todoStr, inProgStr, doneStr, cancStr)
 
 			if i == cursor {
 				line = styles.Highlight.Render(fmt.Sprintf("%-14s", dateDisplay)) +
 					fmt.Sprintf(" | %4d | %s | %s | %s | %s",
-st.Total, todoStr, inProgStr, doneStr, cancStr)
+						st.Total, todoStr, inProgStr, doneStr, cancStr)
 			}
 
 			s.WriteString(prefix + line + suffix + "\n")

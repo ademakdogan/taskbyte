@@ -1,9 +1,9 @@
 package service
 
 import (
-"time"
+	"time"
 
-"github.com/adem/taskbyte/internal/db"
+	"github.com/adem/taskbyte/internal/db"
 )
 
 // FilterStatsByRange filters date stats based on a time range.

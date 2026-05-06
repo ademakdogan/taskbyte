@@ -1,9 +1,9 @@
 package ui
 
 import (
-"testing"
+	"testing"
 
-"github.com/adem/taskbyte/internal/config"
+	"github.com/adem/taskbyte/internal/config"
 )
 
 func TestBuildSettingsItems(t *testing.T) {
@@ -28,8 +28,8 @@ func TestApplySettingsItems(t *testing.T) {
 	items := BuildSettingsItems(cfg)
 
 	// Modify some values
-	items[0].Value = "True" // Auto-hide
-	items[2].Value = "YYYY-MM-DD" // Date format
+	items[0].Value = "True"        // Auto-hide
+	items[2].Value = "YYYY-MM-DD"  // Date format
 	items[5].Value = "light_green" // Done color
 
 	newCfg := ApplySettingsItems(items)

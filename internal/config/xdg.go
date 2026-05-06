@@ -1,9 +1,9 @@
 package config
 
 import (
-"os"
-"path/filepath"
-"runtime"
+	"os"
+	"path/filepath"
+	"runtime"
 )
 
 const appName = "taskbyte"

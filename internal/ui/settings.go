@@ -1,19 +1,19 @@
 package ui
 
 import (
-"fmt"
-"strings"
+	"fmt"
+	"strings"
 
-"github.com/adem/taskbyte/internal/config"
+	"github.com/adem/taskbyte/internal/config"
 )
 
 // SettingItem represents a single setting entry.
 type SettingItem struct {
-	Label    string
-	Type     string // "bool", "select"
-	Value    string
-	Options  []string
-	Section  string // for grouping
+	Label   string
+	Type    string // "bool", "select"
+	Value   string
+	Options []string
+	Section string // for grouping
 }
 
 // BuildSettingsItems creates the list of settings from config.

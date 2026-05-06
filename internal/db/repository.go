@@ -1,11 +1,11 @@
 package db
 
 import (
-"database/sql"
-"fmt"
-"time"
+	"database/sql"
+	"fmt"
+	"time"
 
-"github.com/adem/taskbyte/internal/model"
+	"github.com/adem/taskbyte/internal/model"
 )
 
 // Repository provides CRUD operations for tasks.
@@ -22,9 +22,9 @@ func NewRepository(db *DB) *Repository {
 func (r *Repository) Create(text, date string) (int, error) {
 	now := time.Now().UTC().Format(time.RFC3339)
 	result, err := r.db.conn.Exec(
-"INSERT INTO tasks (text, status, date, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
-text, string(model.StatusTodo), date, now, now,
-)
+		"INSERT INTO tasks (text, status, date, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
+		text, string(model.StatusTodo), date, now, now,
+	)
 	if err != nil {
 		return 0, fmt.Errorf("create task: %w", err)
 	}
@@ -39,9 +39,9 @@ text, string(model.StatusTodo), date, now, now,
 // GetByDate returns all tasks for a given date (YYYY-MM-DD).
 func (r *Repository) GetByDate(date string) ([]model.Task, error) {
 	rows, err := r.db.conn.Query(
-"SELECT id, text, status, date, created_at, updated_at, status_changed_at FROM tasks WHERE date = ? ORDER BY id",
-date,
-)
+		"SELECT id, text, status, date, created_at, updated_at, status_changed_at FROM tasks WHERE date = ? ORDER BY id",
+		date,
+	)
 	if err != nil {
 		return nil, fmt.Errorf("query tasks by date: %w", err)
 	}
@@ -53,8 +53,8 @@ date,
 // GetAll returns all tasks ordered by date descending then id.
 func (r *Repository) GetAll() ([]model.Task, error) {
 	rows, err := r.db.conn.Query(
-"SELECT id, text, status, date, created_at, updated_at, status_changed_at FROM tasks ORDER BY date DESC, id",
-)
+		"SELECT id, text, status, date, created_at, updated_at, status_changed_at FROM tasks ORDER BY date DESC, id",
+	)
 	if err != nil {
 		return nil, fmt.Errorf("query all tasks: %w", err)
 	}
@@ -66,9 +66,9 @@ func (r *Repository) GetAll() ([]model.Task, error) {
 // Search finds tasks whose text contains the query string.
 func (r *Repository) Search(query string) ([]model.Task, error) {
 	rows, err := r.db.conn.Query(
-"SELECT id, text, status, date, created_at, updated_at, status_changed_at FROM tasks WHERE text LIKE ? ORDER BY date DESC, id",
-"%"+query+"%",
-)
+		"SELECT id, text, status, date, created_at, updated_at, status_changed_at FROM tasks WHERE text LIKE ? ORDER BY date DESC, id",
+		"%"+query+"%",
+	)
 	if err != nil {
 		return nil, fmt.Errorf("search tasks: %w", err)
 	}
@@ -81,9 +81,9 @@ func (r *Repository) Search(query string) ([]model.Task, error) {
 func (r *Repository) UpdateText(id int, newText string) error {
 	now := time.Now().UTC().Format(time.RFC3339)
 	_, err := r.db.conn.Exec(
-"UPDATE tasks SET text = ?, updated_at = ? WHERE id = ?",
-newText, now, id,
-)
+		"UPDATE tasks SET text = ?, updated_at = ? WHERE id = ?",
+		newText, now, id,
+	)
 	if err != nil {
 		return fmt.Errorf("update task text: %w", err)
 	}
@@ -94,9 +94,9 @@ newText, now, id,
 func (r *Repository) UpdateStatus(id int, status model.Status) error {
 	now := time.Now().UTC().Format(time.RFC3339)
 	_, err := r.db.conn.Exec(
-"UPDATE tasks SET status = ?, status_changed_at = ?, updated_at = ? WHERE id = ?",
-string(status), now, now, id,
-)
+		"UPDATE tasks SET status = ?, status_changed_at = ?, updated_at = ? WHERE id = ?",
+		string(status), now, now, id,
+	)
 	if err != nil {
 		return fmt.Errorf("update task status: %w", err)
 	}
@@ -107,9 +107,9 @@ string(status), now, now, id,
 func (r *Repository) UpdateDate(id int, newDate string) error {
 	now := time.Now().UTC().Format(time.RFC3339)
 	_, err := r.db.conn.Exec(
-"UPDATE tasks SET date = ?, updated_at = ? WHERE id = ?",
-newDate, now, id,
-)
+		"UPDATE tasks SET date = ?, updated_at = ? WHERE id = ?",
+		newDate, now, id,
+	)
 	if err != nil {
 		return fmt.Errorf("update task date: %w", err)
 	}
@@ -128,9 +128,9 @@ func (r *Repository) Delete(id int) error {
 // GetUnfinishedByDate returns todo and in_progress tasks for a given date.
 func (r *Repository) GetUnfinishedByDate(date string) ([]model.Task, error) {
 	rows, err := r.db.conn.Query(
-"SELECT id, text, status, date, created_at, updated_at, status_changed_at FROM tasks WHERE date = ? AND status IN (?, ?) ORDER BY id",
-date, string(model.StatusTodo), string(model.StatusInProgress),
-)
+		"SELECT id, text, status, date, created_at, updated_at, status_changed_at FROM tasks WHERE date = ? AND status IN (?, ?) ORDER BY id",
+		date, string(model.StatusTodo), string(model.StatusInProgress),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("query unfinished tasks: %w", err)
 	}
@@ -142,9 +142,9 @@ date, string(model.StatusTodo), string(model.StatusInProgress),
 // GetAllUnfinished returns all todo and in_progress tasks across all dates.
 func (r *Repository) GetAllUnfinished() ([]model.Task, error) {
 	rows, err := r.db.conn.Query(
-"SELECT id, text, status, date, created_at, updated_at, status_changed_at FROM tasks WHERE status IN (?, ?) ORDER BY date, id",
-string(model.StatusTodo), string(model.StatusInProgress),
-)
+		"SELECT id, text, status, date, created_at, updated_at, status_changed_at FROM tasks WHERE status IN (?, ?) ORDER BY date, id",
+		string(model.StatusTodo), string(model.StatusInProgress),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("query all unfinished tasks: %w", err)
 	}
@@ -196,9 +196,9 @@ func (r *Repository) GetDateStats() ([]DateStats, error) {
 // GetByID returns a single task by its ID.
 func (r *Repository) GetByID(id int) (*model.Task, error) {
 	row := r.db.conn.QueryRow(
-"SELECT id, text, status, date, created_at, updated_at, status_changed_at FROM tasks WHERE id = ?",
-id,
-)
+		"SELECT id, text, status, date, created_at, updated_at, status_changed_at FROM tasks WHERE id = ?",
+		id,
+	)
 
 	t, err := scanTask(row)
 	if err != nil {

@@ -1,10 +1,10 @@
 package service
 
 import (
-"testing"
-"time"
+	"testing"
+	"time"
 
-"github.com/adem/taskbyte/internal/db"
+	"github.com/adem/taskbyte/internal/db"
 )
 
 func TestFilterStatsByRange_All(t *testing.T) {

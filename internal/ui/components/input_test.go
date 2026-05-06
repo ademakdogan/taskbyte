@@ -1,9 +1,9 @@
 package components
 
 import (
-"testing"
+	"testing"
 
-"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/lipgloss"
 )
 
 func TestInputBox_Render(t *testing.T) {

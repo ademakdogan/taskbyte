@@ -1,10 +1,10 @@
 package config
 
 import (
-"os"
-"path/filepath"
-"runtime"
-"testing"
+	"os"
+	"path/filepath"
+	"runtime"
+	"testing"
 )
 
 func TestDataDir_Default(t *testing.T) {

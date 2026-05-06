@@ -1,9 +1,9 @@
 package ui
 
 import (
-"testing"
+	"testing"
 
-"github.com/adem/taskbyte/internal/config"
+	"github.com/adem/taskbyte/internal/config"
 )
 
 func TestNewStyles(t *testing.T) {

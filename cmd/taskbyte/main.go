@@ -1,15 +1,15 @@
 package main
 
 import (
-"fmt"
-"os"
+	"fmt"
+	"os"
 
-tea "github.com/charmbracelet/bubbletea"
+	tea "github.com/charmbracelet/bubbletea"
 
-"github.com/adem/taskbyte/internal/app"
-"github.com/adem/taskbyte/internal/config"
-"github.com/adem/taskbyte/internal/db"
-"github.com/adem/taskbyte/internal/service"
+	"github.com/adem/taskbyte/internal/app"
+	"github.com/adem/taskbyte/internal/config"
+	"github.com/adem/taskbyte/internal/db"
+	"github.com/adem/taskbyte/internal/service"
 )
 
 func main() {

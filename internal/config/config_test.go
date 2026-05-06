@@ -1,10 +1,10 @@
 package config
 
 import (
-"encoding/json"
-"os"
-"path/filepath"
-"testing"
+	"encoding/json"
+	"os"
+	"path/filepath"
+	"testing"
 )
 
 func setupTestEnv(t *testing.T) string {

@@ -1,10 +1,10 @@
 package service
 
 import (
-"testing"
+	"testing"
 
-"github.com/adem/taskbyte/internal/db"
-"github.com/adem/taskbyte/internal/model"
+	"github.com/adem/taskbyte/internal/db"
+	"github.com/adem/taskbyte/internal/model"
 )
 
 func newTestService(t *testing.T) *TaskService {
